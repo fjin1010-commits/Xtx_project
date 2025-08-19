@@ -2,6 +2,7 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import { createPinia } from 'pinia'
 import 'element-plus/theme-chalk/src/index.scss'
+import '@/styles/common.scss'
 import { getCategory } from './api/test'
 import router from './router'
 
