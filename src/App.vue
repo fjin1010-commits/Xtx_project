@@ -1,14 +1,11 @@
 <script setup>
-
-import { ElButton } from 'element-plus'
-import 'element-plus/dist/index.css'
-
+import 'element-plus/theme-chalk/el-button.css'
 </script>
 
 <template>
-  <el-button type="primary">Primary</el-button>
+  <router-view />
 
 
 </template>
 
-<style scoped></style>
+<style lang="scss"></style>
