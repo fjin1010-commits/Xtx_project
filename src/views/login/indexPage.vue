@@ -5,5 +5,12 @@
 
 <template>
 
-  <div> 我是登录</div>
+  <div class = "test"> 我是登录</div>
 </template>
+
+<style lang="scss">
+.test {
+  color: $priceColor;
+  font-size: 20px;
+}
+</style>
