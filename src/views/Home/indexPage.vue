@@ -4,7 +4,6 @@ import HomeHot from "./components/HomeHot.vue";
 import HomeCategory from "./components/HomeCategory.vue";
 import HomeNew from "./components/HomeNew.vue";
 import HomeProduct from "./components/HomeProduct.vue";
-
 </script>
 
 <template>
@@ -15,4 +14,6 @@ import HomeProduct from "./components/HomeProduct.vue";
   <HomeNew />
   <HomeHot />
   <HomeProduct />
+  
+  
 </template>
