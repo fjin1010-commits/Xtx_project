@@ -1,11 +1,11 @@
 <script setup>
-import { getNewAPI } from "@/api/getNewAPI";
+import { findNewAPI } from "@/api/home";
 import { ref } from "vue";
 import HomePanel from "./HomePanel.vue";
 
 const newItems = ref([]);
 const fetchNewItems = async () => {
-    const response = await getNewAPI(); // 调试输出
+    const response = await findNewAPI(); // 调试输出
     newItems.value = response.result; // 这里能看到数据
 };
 

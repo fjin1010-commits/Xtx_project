@@ -1,11 +1,11 @@
 <script setup>
 import HomePanel from './HomePanel.vue'
-import { getProudctAPI } from '@/api/getProductAPI';
+import { getGoodsAPI} from '@/api/home';
 import { ref, onMounted } from 'vue'; 
 import GoodsItem from './GoodsItem.vue';
 const goodsProduct = ref([]);
 const fetchGoodsProduct = async () => {
-  const response = await getProudctAPI();
+  const response = await getGoodsAPI();
   goodsProduct.value = response.result;
  // 调试输出
 };

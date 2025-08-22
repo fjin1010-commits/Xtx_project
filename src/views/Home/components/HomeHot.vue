@@ -1,5 +1,5 @@
 <script setup>
-import { getHotAPI } from "@/api/getHotAPI";
+import { getHotAPI } from '@/api/home';
 import { onMounted, ref } from "vue";
 import HomePanel from "./HomePanel.vue";
 
