@@ -5,7 +5,6 @@ export const lazyPlugin = {
   install(app) {
     app.directive('img-lazy', {
       mounted(el, binding) {
-        console.log('img-lazy directive mounted', el, binding.value);
         const{stop} = useIntersectionObserver(
           el,
           ([entry]) => {

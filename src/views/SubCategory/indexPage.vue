@@ -1,18 +1,50 @@
 <script setup>
 import { getCategoryFilterAPI } from "@/api/category";
+import { getSubCategoryAPI } from "@/api/category";
 import { useRoute } from "vue-router";
 import { onMounted, ref } from "vue";
+import GoodsItem from "@/views/Home/components/GoodsItem.vue";
 
 const route = useRoute();
 const subCategoryId = route.params.id;
 const subCategory = ref({});
-
-onMounted(async () => {
+const subCategoryList = ref([]);
+const reqData = ref({
+  categoryId: route.params.id,
+  page: 1,
+  pageSize: 20,
+  sortField: 'publishTime'
+})
+const getSubCategory = async () => {
   const res = await getCategoryFilterAPI(subCategoryId);
   subCategory.value = res.result;
-  console.log("分类数据:", subCategory.value);
-  console.log("当前子分类ID:", subCategory.value.name);
-});
+};
+const getSubCategoryList = async () => {
+  const res = await getSubCategoryAPI(reqData.value);
+  subCategoryList.value = res.result.items
+  
+};
+
+onMounted(
+  getSubCategory(),
+  getSubCategoryList()
+);
+
+const changeTab = () =>{
+  getSubCategoryList();
+  reqData.value.page = 1; // 重置页码
+}
+
+const disabled = ref(false);
+
+const load = async () => {
+  reqData.value.page++;
+  const res = await getSubCategoryAPI(reqData.value);
+  subCategoryList.value.push(...res.result.items);
+  if(res.result.items.length === 0){
+    disabled.value = true;
+  }
+};
 </script>
 
 <template>
@@ -28,12 +60,13 @@ onMounted(async () => {
       </el-breadcrumb>
     </div>
     <div class="sub-container">
-      <el-tabs>
-        <el-tab-pane label="最新商品" name="publishTime"></el-tab-pane>
-        <el-tab-pane label="最高人气" name="orderNum"></el-tab-pane>
-        <el-tab-pane label="评论最多" name="evaluateNum"></el-tab-pane>
+      <el-tabs v-model="reqData.sortField" @tab-change="changeTab">
+        <el-tab-pane label="最新商品" name="publishTime" ></el-tab-pane>
+        <el-tab-pane label="最高人气" name="orderNum" ></el-tab-pane>
+        <el-tab-pane label="评论最多" name="evaluateNum" ></el-tab-pane>
       </el-tabs>
-      <div class="body">
+      <div class="body" v-infinite-scroll="load" :infinite-scroll-disabled="disabled">
+        <GoodsItem v-for="item in subCategoryList" :key="item.id" :good="item" />
         <!-- 商品列表-->
       </div>
     </div>
