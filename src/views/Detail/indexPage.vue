@@ -2,6 +2,7 @@
 import { getDetail } from '@/api/detail.js';
 import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
+import GoodHot from './Components/goodHot.vue';
 
 const goods = ref({});
 const route = useRoute();
@@ -120,7 +121,8 @@ onMounted(() => {
             </div>
             <!-- 24热榜+专题推荐 -->
             <div class="goods-aside">
-
+              <GoodHot :type="1"/>
+              <GoodHot :type="2"/>
             </div>
           </div>
         </div>
