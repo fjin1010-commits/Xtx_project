@@ -1,8 +1,8 @@
 <script setup>
-import layoutNav from '@/components/layoutNav.vue';
-import layoutHeader from '@/components/layoutHeader.vue';
-import layoutFooter from '@/components/layoutFooter.vue';
-import layoutFixed from '@/components/layoutFixed.vue';
+import layoutNav from '@/views/layout/components/layoutNav.vue';
+import layoutHeader from '@/views/layout/components/layoutHeader.vue';
+import layoutFooter from '@/views/layout/components/layoutFooter.vue';
+import layoutFixed from '@/views/layout/components/layoutFixed.vue';
 import { useCategoryStore } from '@/stores/category';
 import { onMounted } from 'vue';
 

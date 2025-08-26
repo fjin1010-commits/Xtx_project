@@ -10,12 +10,16 @@ const goodId = route.params.id;
 const getGoods = async () => {
   const res = await getDetail(goodId);
   goods.value = res.result;
-  console.log('商品详情数据:', goods.value); // 调试输出
+  console.log('商品详情数据:', goods.value.mainPictures); // 调试输出
 }
 
 onMounted(() => {
   getGoods(); 
 });
+
+const getSku = (skuInfo) => {
+  console.log('选中的sku信息:', skuInfo)
+}
 
 </script>
 
@@ -38,7 +42,7 @@ onMounted(() => {
           <div class="goods-info">
             <div class="media">
               <!-- 图片预览区 -->
-
+              <PicList :imageList="goods.mainPictures" />
               <!-- 统计数量 -->
               <ul class="goods-sales">
                 <li>
@@ -87,7 +91,7 @@ onMounted(() => {
                 </dl>
               </div>
               <!-- sku组件 -->
-
+              <XtxSku :goods="goods" @change="getSku"/>
               <!-- 数据组件 -->
 
               <!-- 按钮组件 -->

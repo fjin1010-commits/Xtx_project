@@ -6,8 +6,7 @@ import HomePanel from "./HomePanel.vue";
 const hotItems = ref([]);
 const fetchHotItems = async () => {
     const response = await getHotAPI(); // 调试输出
-    hotItems.value = response.result; // 这里能看到数据
-    console.log('热门商品数据:', hotItems.value); // 这里能看到数据
+    hotItems.value = response.result;    // 这里能看到数据
 };
 onMounted(() => {
     fetchHotItems();
