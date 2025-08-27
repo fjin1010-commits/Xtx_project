@@ -1,8 +1,8 @@
 <script setup>
+import router from '@/router';
 import { useCartStore } from '@/stores/cart'
 
 const store = useCartStore();
-const totalPrice = store.cartList.reduce((total, item) => total + item.price * item.num, 0).toFixed(2);
 </script>
 
 <template>
@@ -13,7 +13,7 @@ const totalPrice = store.cartList.reduce((total, item) => total + item.price * i
     <div class="layer">
       <div class="list">
         <div class="item" v-for="i in store.cartList" :key="i">
-          <RouterLink to="">
+          <RouterLink to="/cartList">
             <img :src="i.picture" alt="" />
             <div class="center">
               <p class="name ellipsis-2">
@@ -35,7 +35,7 @@ const totalPrice = store.cartList.reduce((total, item) => total + item.price * i
           <p>共{{ store.totalItem }} 件商品</p>
           <p>&yen; {{ store.totalPrice }}</p>
         </div>
-        <el-button size="large" type="primary" >去购物车结算</el-button>
+        <el-button size="large" type="primary" @click="router.push('/cartlist')">去购物车结算</el-button>
       </div>
     </div>
 </div>

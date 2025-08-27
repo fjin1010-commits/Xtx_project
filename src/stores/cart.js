@@ -1,4 +1,3 @@
-import { tryOnBeforeMount } from "@vueuse/core";
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import { computed } from "vue";
@@ -18,7 +17,15 @@ export const useCartStore = defineStore('cart',() =>{
   const delCart = (id) => {
     cartList.value = cartList.value.filter(item => item.id !== id);
   };
-  return { cartList, addCart, delCart, totalItem, totalPrice };
+
+  const checkedState = (item, selected) => {
+    const target = cartList.value.find(i => i.id === item.id);
+    if (target) {
+      target.selected = selected;
+    }
+  };
+
+  return { cartList, addCart, delCart, totalItem, totalPrice, checkedState };
 
 }, {
     persist: true,
