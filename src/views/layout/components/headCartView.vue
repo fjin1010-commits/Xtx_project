@@ -32,8 +32,8 @@ const totalPrice = store.cartList.reduce((total, item) => total + item.price * i
       </div>
       <div class="foot">
         <div class="total">
-          <p>共{{ store.cartList.length }} 件商品</p>
-          <p>&yen; {{ totalPrice }}</p>
+          <p>共{{ store.totalItem }} 件商品</p>
+          <p>&yen; {{ store.totalPrice }}</p>
         </div>
         <el-button size="large" type="primary" >去购物车结算</el-button>
       </div>
