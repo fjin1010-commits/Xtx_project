@@ -6,6 +6,7 @@ import HomePage from "../views/Home/indexPage.vue";
 import SubCategoryPage from "../views/SubCategory/indexPage.vue";
 import DetailPage from "../views/Detail/indexPage.vue";
 import cartListPage from "../views/CartList/indexPage.vue";
+import CheckoutPage from "../views/Checkout/indexPage.vue";
 const router = createRouter({
   history: createWebHistory(),
   routes: [
@@ -33,6 +34,10 @@ const router = createRouter({
           path: "/cartlist",
           component: cartListPage,
         },
+        {
+          path: "/checkout",
+          component: CheckoutPage,
+        }
       ],
     },
     {

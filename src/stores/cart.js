@@ -1,17 +1,23 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import { computed } from "vue";
+import { useUserStore } from "./user";
 
 export const useCartStore = defineStore('cart',() =>{
   const cartList = ref([]);
-  const addCart = (goods) => {
+  const userStore = useUserStore();
+  const islogin = computed(() => userStore.userInfo.token);
+  const addCart = async (goods) => {
+    if(islogin.value){
+     console.log('登录了');
+    }else{
     const item = cartList.value.find((item) => item.id === goods.id);
     if (item) {
       item.num++;
     } else {
       cartList.value.push(goods);
     }
-  };
+  }};
   const totalItem = computed(() => cartList.value.reduce((sum, item) => sum + item.num, 0));
   const selectedTotalItem = computed(() => cartList.value.filter(item => item.selected).reduce((sum, item) => sum + item.num, 0));
   const totalPrice = computed(() => cartList.value.reduce((sum, item) => sum + item.price * item.num, 0).toFixed(2));
@@ -37,5 +43,6 @@ export const useCartStore = defineStore('cart',() =>{
   return { cartList, addCart, delCart, totalItem, totalPrice, checkedState, isAll, tickAll, selectedTotalItem, selectedTotalPrice};
 
 }, {
-    persist: true,
-  })
+  persist: true,
+
+});

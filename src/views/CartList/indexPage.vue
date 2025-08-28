@@ -1,5 +1,6 @@
 <script setup>
 import { useCartStore } from '@/stores/cart';
+import router from '@/router';
 const cartStore = useCartStore();
 console.log(cartStore.cartList);
 const updateChecked = (item, selected) => {
@@ -82,7 +83,7 @@ const checkAll = (selected) => {
           <span class="red">¥ {{ cartStore.selectedTotalPrice }} </span>
         </div>
         <div class="total">
-          <el-button size="large" type="primary" >下单结算</el-button>
+          <el-button size="large" type="primary" @click="router.push('/checkout')">下单结算</el-button>
         </div>
       </div>
     </div>

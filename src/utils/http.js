@@ -4,7 +4,7 @@ import { useUserStore } from "@/stores/user";
 import router from "@/router";
 
 const httpInstance = axios.create({
-  baseURL: "http://pcapi-xiaotuxian-front-devtest.itheima.net", // 替换为你的API基础URL
+  baseURL: "https://pcapi-xiaotuxian-front-devtest.itheima.net", // 替换为你的API基础URL
   timeout: 10000, // 请求超时时间
 });
 
