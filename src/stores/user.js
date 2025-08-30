@@ -1,26 +1,38 @@
 import { defineStore } from "pinia";
-import { ref } from "vue";
-import { loginAPI } from '@/api/user';
-import { ElMessage } from 'element-plus';
-import router from '@/router';
-
-
-export const useUserStore = defineStore('user',() =>{
-  const userInfo = ref({});
-  
-  const handleLogin = async ({account,password}) => {
-    const res = await loginAPI({ account, password });
-    console.log(res);
-    userInfo.value = res.result;
-    if (res) {
+import { signInAPI, signUpAPI} from "@/api/user";
+import bcrypt from 'bcryptjs';
+import {ElMessage } from "element-plus";
+export const useUserStore = defineStore('user', {
+  state: () => ({
+    userInfo: {
+      account:'',
+      password:'',
+      agree: false,
+      confirmPassword:''
+    },
+  }),
+  actions: {
+    async signIn() {
+      const {account} = this.userInfo;
+      const response = await signInAPI({ account});
+      if(!bcrypt.compareSync(this.userInfo.password, response.password)){
+        ElMessage.error('密码错误');
+        return;
+      }
       ElMessage.success('登录成功');
-      router.replace('/');
+      return response;
+    },
+    async signUp() {
+      const { account, password } = this.userInfo;
+      const hashedPassword = bcrypt.hashSync(password, 10);
+      const {data,error} = await signUpAPI({ account, password: hashedPassword });
+      if(error){
+        ElMessage.error('注册失败,用户名可能已存在');
+        return;
+      }
+      ElMessage.success('注册成功,请登录');
+      return data;
     }
-    
-  };
-
-  const clearUserInfo = () => { userInfo.value = {} };
-  return { handleLogin, userInfo, clearUserInfo };
-},{
-    persist: true,
-  })
+  },
+  persist: true
+})

@@ -1,48 +1,83 @@
 <script setup>
-import { ref } from 'vue';
-import { useUserStore } from '@/stores/user';
+import { ref } from "vue";
+import bcrypt from 'bcryptjs';
+import { useUserStore } from "@/stores/user";
+import { ElMessage } from "element-plus";
 
 const userStore = useUserStore();
-
+const signupOrLogin = ref('signIn'); // 'signIn'表示登录，'signUp'表示注册
+const active = ref(true); // true表示登录，false表示注册
+const handleSignChange = (val) => {
+  active.value = (val === 'signIn');
+};
 const rules = {
-  account: [
-    { required: true, message: '请输入账户', trigger: 'blur' }
-  ],
+  account: [{ required: true, message: "请输入账户", trigger: "blur" }],
   password: [
-    { required: true, message: '请输入密码', trigger: 'blur' },
-    { type: 'string', min: 6, max: 16, message: '密码长度在6到16个字符之间' }
+    { required: true, message: "请输入密码", trigger: "blur" },
+    { type: "string", min: 6, max: 16, message: "密码长度在6到16个字符之间" },
+  ],
+  confirmPassword: [
+    { required: true, message: "请再次输入密码", trigger: "blur" },
+    {
+      validator: (rule, value, callback) => {
+        if (value !== userStore.userInfo.password) {
+          callback(new Error("两次输入的密码不一致"));
+        } else {
+          callback();
+        }
+      },
+      trigger: "blur",
+    },
   ],
   agree: [
     {
-      validator: (rule,value, callback) => {
+      validator: (rule, value, callback) => {
         if (!value) {
-          callback(new Error('请同意隐私条款和服务条款'))
+          callback(new Error("请同意隐私条款和服务条款"));
         } else {
-          callback()
+          callback();
         }
       },
-      trigger: 'change'
-    }
-  ]
-}
+      trigger: "change",
+    },
+  ],
+};
 
 const formRef = ref(null);
-const user = ref({
-  account: 'heima293',
-  password: 'hm#qd@23!',
-  agree: false
-});
-const dologin = () =>{
+
+const logIn = () => {
   formRef.value.validate(async (valid) => {
     if (valid) {
-      await userStore.handleLogin(user.value);
-    } else {
-      console.log('error submit!!');
+      const dbuser = await userStore.signIn();
+      console.log(userStore.userInfo);
+      if (dbuser && bcrypt.compareSync(userStore.userInfo.password, dbuser.password)) {
+        console.log("登录成功", userStore.userInfo.account);
+        
+        ElMessage.success("登录成功");
+      }
+    }else{
+      console.log("error submit!!");
       return false;
     }
   });
-}
+};
 
+const signUp = () => {
+  
+  formRef.value.validate(async (valid) => {
+    if (valid) {
+      const res = await userStore.signUp();
+      if(res){
+        ElMessage.success('注册成功,请登录');
+        signupOrLogin.value = 'signIn';
+        active.value = true;
+      }
+    } else {
+      console.log("error submit!!");
+      return false;
+    }
+  })
+}
 </script>
 
 <template>
@@ -64,26 +99,44 @@ const dologin = () =>{
         <nav>
           <a href="javascript:;">账户登录</a>
         </nav>
+        <div class="sign-option">
+          <el-radio-group class="sign-button" v-model="signupOrLogin" aria-label="signup&login" @change="handleSignChange">
+            <el-radio-button value="signIn">已有帐户</el-radio-button>
+            <el-radio-button value="signUp">仍未注册</el-radio-button>
+          </el-radio-group>
+          </div>
         <div class="account-box">
-          <div class="form" >
-            <el-form label-position="right" label-width="60px"
-              status-icon :rules="rules" :model="user" ref="formRef">
-              <el-form-item  label="账户" prop="account">
-                <el-input v-model="user.account"/>
+
+          <div class="form">
+            <el-form
+              label-position="right"
+              label-width="80px"
+              status-icon
+              :rules="rules"
+              :model="userStore.userInfo"
+              ref="formRef"
+            >
+              <el-form-item label="账户" prop="account">
+                <el-input v-model="userStore.userInfo.account" />
               </el-form-item>
               <el-form-item label="密码" prop="password">
-                <el-input v-model="user.password" type="password"/>
+                <el-input v-model="userStore.userInfo.password" type="password" />
+              </el-form-item>
+              <el-form-item v-if="signupOrLogin === 'signUp'" label="确认密码" prop="confirmPassword">
+                <el-input v-model="userStore.userInfo.confirmPassword" type="password" />
               </el-form-item>
               <el-form-item label-width="22px" prop="agree">
-                <el-checkbox  size="large" v-model="user.agree">
+                <el-checkbox size="large" v-model="userStore.userInfo.agree">
                   我已同意隐私条款和服务条款
                 </el-checkbox>
               </el-form-item>
-              <el-button size="large" class="subBtn" @click="dologin">点击登录</el-button>
+              <el-button v-if="signupOrLogin === 'signIn'" size="large" class="subBtn" @click="logIn">点击登录</el-button>
+              <el-button v-if="signupOrLogin === 'signUp'" size="large" class="subBtn" @click="signUp">点击注册</el-button>
             </el-form>
           </div>
         </div>
       </div>
+      
     </section>
 
     <footer class="login-footer">
@@ -103,7 +156,14 @@ const dologin = () =>{
   </div>
 </template>
 
-<style scoped lang='scss'>
+<style scoped lang="scss">
+.sign-option{
+  margin:10px auto;
+  text-align:center;
+}
+
+
+
 .login-header {
   background: #fff;
   border-bottom: 1px solid #e4e4e4;
@@ -149,12 +209,12 @@ const dologin = () =>{
 }
 
 .login-section {
-  background: url('@/assets/images/login-bg.png') no-repeat center / cover;
+  background: url("@/assets/images/login-bg.png") no-repeat center / cover;
   height: 488px;
   position: relative;
 
   .wrapper {
-    width: 380px;
+    width: 440px;
     background: #fff;
     position: absolute;
     left: 50%;
@@ -165,7 +225,6 @@ const dologin = () =>{
     nav {
       font-size: 14px;
       height: 55px;
-      margin-bottom: 20px;
       border-bottom: 1px solid #f5f5f5;
       display: flex;
       padding: 0 40px;
@@ -199,7 +258,7 @@ const dologin = () =>{
       color: #999;
       display: inline-block;
 
-      ~a {
+      ~ a {
         border-left: 1px solid #ccc;
       }
     }
@@ -230,7 +289,7 @@ const dologin = () =>{
         position: relative;
         height: 36px;
 
-        >i {
+        > i {
           width: 34px;
           height: 34px;
           background: #cfcdcd;
@@ -275,7 +334,7 @@ const dologin = () =>{
         }
       }
 
-      >.error {
+      > .error {
         position: absolute;
         font-size: 12px;
         line-height: 28px;
