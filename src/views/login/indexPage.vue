@@ -3,6 +3,7 @@ import { ref } from "vue";
 import bcrypt from 'bcryptjs';
 import { useUserStore } from "@/stores/user";
 import { ElMessage } from "element-plus";
+import router from "@/router";
 
 const userStore = useUserStore();
 const signupOrLogin = ref('signIn'); // 'signIn'表示登录，'signUp'表示注册
@@ -49,12 +50,10 @@ const logIn = () => {
   formRef.value.validate(async (valid) => {
     if (valid) {
       const dbuser = await userStore.signIn();
-      console.log(userStore.userInfo);
-      if (dbuser && bcrypt.compareSync(userStore.userInfo.password, dbuser.password)) {
-        console.log("登录成功", userStore.userInfo.account);
-        
-        ElMessage.success("登录成功");
+      if(dbuser){
+        router.push("/");
       }
+      
     }else{
       console.log("error submit!!");
       return false;

@@ -14,13 +14,15 @@ export const useUserStore = defineStore('user', {
   actions: {
     async signIn() {
       const {account} = this.userInfo;
-      const response = await signInAPI({ account});
-      if(!bcrypt.compareSync(this.userInfo.password, response.password)){
+      const {data, error} = await signInAPI({ account });
+      console.log(data,error);
+      if(!bcrypt.compareSync(this.userInfo.password, data.password)){
         ElMessage.error('密码错误');
-        return;
+        return; 
       }
+      this.userInfo = { ...data, password: '' };
       ElMessage.success('登录成功');
-      return response;
+      return data;
     },
     async signUp() {
       const { account, password } = this.userInfo;
@@ -32,6 +34,9 @@ export const useUserStore = defineStore('user', {
       }
       ElMessage.success('注册成功,请登录');
       return data;
+    },
+    logOut(){
+      this.$reset();
     }
   },
   persist: true

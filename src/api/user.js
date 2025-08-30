@@ -21,8 +21,9 @@ export const signInAPI = async ({ account }) => {
     .single();
 
   if (error) {
+    console.log(data,error);
     throw new Error(error.message);
   }
-
+  
   return {data,error};
 }

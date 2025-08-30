@@ -4,7 +4,7 @@ import { useUserStore } from '@/stores/user';
 
 const userStore = useUserStore();
 const confirm = () => {
-  userStore.clearUserInfo();
+  userStore.logOut();
   router.replace('/login');
 }
 </script>
@@ -13,7 +13,7 @@ const confirm = () => {
   <nav class="app-topnav">
     <div class="container">
       <ul>
-        <template v-if="userStore.userInfo.token">
+        <template v-if="userStore.userInfo.id">
           <li><a href="javascript:;"><i class="iconfont icon-user"></i>{{ userStore.userInfo.account }}</a></li>
           <li>
             <el-popconfirm title="确认退出吗?" @confirm="confirm" confirm-button-text="确认" cancel-button-text="取消">
