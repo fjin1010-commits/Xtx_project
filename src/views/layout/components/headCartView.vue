@@ -1,20 +1,25 @@
 <script setup>
 import router from '@/router';
 import { useCartStore } from '@/stores/cart'
-
-const store = useCartStore();
+import { onMounted } from 'vue';
+import { useUserStore } from '@/stores/user';
+const cartStore = useCartStore();
+const userStore = useUserStore();
+onMounted(async () => {
+  await cartStore.getCart();
+});
 </script>
 
 <template>
   <div class="cart">
     <a class="curr" href="javascript:;">
-      <i class="iconfont icon-cart"></i><em>{{ store.cartList.length }}</em>
+      <i class="iconfont icon-cart"></i><em>{{ cartStore.cartList.length }}</em>
     </a>
     <div class="layer">
       <div class="list">
-        <div class="item" v-for="i in store.cartList" :key="i">
+        <div class="item" v-for="i in cartStore.cartList" :key="i">
           <RouterLink to="/cartList">
-            <img :src="i.picture" alt="" />
+            <img :src="i.image" alt="" />
             <div class="center">
               <p class="name ellipsis-2">
                 {{ i.name }}
@@ -23,19 +28,19 @@ const store = useCartStore();
             </div>
             <div class="right">
               <p class="price">&yen;{{ i.price }}</p>
-              <p class="count">x{{ i.num }}</p>
+              <p class="count">x{{ i.count }}</p>
             </div>
           </RouterLink>
-          <i class="iconfont icon-close-new" @click="store.delCart(i.id)"></i>
+          <i class="iconfont icon-close-new" @click="cartStore.removeCartItem(i)"></i>
         </div>
        
       </div>
       <div class="foot">
         <div class="total">
-          <p>共{{ store.totalItem }} 件商品</p>
-          <p>&yen; {{ store.totalPrice }}</p>
+          <p>共{{  cartStore.totalItems }} 件商品</p>
+          <p>&yen; {{  cartStore.totalPrice }}</p>
         </div>
-        <el-button size="large" type="primary" @click="router.push('/cartlist')">去购物车结算</el-button>
+        <el-button size="large" type="primary" @click="router.push(`/cartlist/${userStore.userInfo.id}`)">去购物车结算</el-button>
       </div>
     </div>
 </div>

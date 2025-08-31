@@ -5,6 +5,7 @@ import {ElMessage } from "element-plus";
 export const useUserStore = defineStore('user', {
   state: () => ({
     userInfo: {
+      id: '',
       account:'',
       password:'',
       agree: false,

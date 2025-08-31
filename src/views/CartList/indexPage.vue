@@ -1,13 +1,18 @@
 <script setup>
 import { useCartStore } from '@/stores/cart';
+import { useUserStore } from '@/stores/user';
 import router from '@/router';
+import { useRoute } from 'vue-router';
+const route = useRoute();
+const userId = route.params.userId;
 const cartStore = useCartStore();
+const userStore = useUserStore();
 console.log(cartStore.cartList);
 const updateChecked = (item, selected) => {
-  cartStore.checkedState(item, selected);
+  cartStore.updateCheckedState(item, selected);
 };
 const checkAll = (selected) => {
-  cartStore.tickAll(selected);
+  cartStore.updateAllCheckedStateAPI(userStore.userInfo.id, selected);
 }
 </script>
 
@@ -32,11 +37,11 @@ const checkAll = (selected) => {
           <tbody>
             <tr v-for="i in cartStore.cartList" :key="i.id">
               <td>
-                <el-checkbox :model-value="i.selected" @change="(selected) => updateChecked(i, selected)"/>
+                <el-checkbox :model-value="i.checked" @change="(selected) => updateChecked(i, selected)"/>
               </td>
               <td>
                 <div class="goods">
-                  <RouterLink to="/"><img :src="i.picture" alt="" /></RouterLink>
+                  <RouterLink to="/"><img :src="i.image" alt="" /></RouterLink>
                   <div>
                     <p class="name ellipsis">
                       {{ i.name }}
@@ -48,16 +53,16 @@ const checkAll = (selected) => {
                 <p>&yen;{{ i.price }}</p>
               </td>
               <td class="tc">
-                <el-input-number v-model="i.num" />
+                <el-input-number v-model="i.count" />
               </td>
               <td class="tc">
-                <p class="f16 red">&yen;{{ (i.price * i.num).toFixed(2) }}</p>
+                <p class="f16 red">&yen;{{ (i.price * i.count).toFixed(2) }}</p>
               </td>
               <td class="tc">
                 <p>
-                  <el-popconfirm title="确认删除吗?" confirm-button-text="确认" cancel-button-text="取消" @confirm="delCart(i)">
+                  <el-popconfirm title="确认删除吗?" confirm-button-text="确认" cancel-button-text="取消" @confirm="cartStore.removeCartItem(i)">
                     <template #reference>
-                      <a href="javascript:;" @click="cartStore.delCart(i.id)">删除</a>
+                      <a href="javascript:;">删除</a>
                     </template>
                   </el-popconfirm>
                 </p>
@@ -79,7 +84,7 @@ const checkAll = (selected) => {
       <!-- 操作栏 -->
       <div class="action">
         <div class="batch">
-          共 {{ cartStore.totalItem }} 件商品，已选择 {{ cartStore.selectedTotalItem }} 件，商品合计：
+          共 {{ cartStore.totalItems }} 件商品，已选择 {{ cartStore.selectedTotalItem }} 件，商品合计：
           <span class="red">¥ {{ cartStore.selectedTotalPrice }} </span>
         </div>
         <div class="total">

@@ -1,48 +1,65 @@
 import { defineStore } from "pinia";
-import { ref } from "vue";
-import { computed } from "vue";
 import { useUserStore } from "./user";
+import {
+  getCartAPI,
+  addCartAPI,
+  removeCartAPI,
+  updateAllCheckedStateAPI,
+  updateCheckedStateAPI,
+} from "@/api/cart";
 
-export const useCartStore = defineStore('cart',() =>{
-  const cartList = ref([]);
-  const userStore = useUserStore();
-  const islogin = computed(() => userStore.userInfo.token);
-  const addCart = async (goods) => {
-    if(islogin.value){
-     console.log('登录了');
-    }else{
-    const item = cartList.value.find((item) => item.id === goods.id);
-    if (item) {
-      item.num++;
-    } else {
-      cartList.value.push(goods);
+export const useCartStore = defineStore("cart", {
+  state: () => ({
+    cartList: [],
+  }),
+
+  actions: {
+    async getCart() {
+      const userStore = useUserStore();
+      const { data, error } = await getCartAPI(userStore.userInfo.id);
+      if (error) {
+        console.log("Failed to fetch cart data:", error);
+        return;
+      }
+      this.cartList = data;
+    },
+    async addToCart(item) {
+      await addCartAPI(item);
+      await this.getCart();
+    },
+    async removeCartItem(item) {
+      await removeCartAPI(item);
+      await this.getCart();
+    },
+    async updateCheckedState(item, checked) {
+      await updateCheckedStateAPI(item, checked );
+      await this.getCart(); // 更新本地cartList
+    },
+    async updateAllCheckedStateAPI(userId, checked) {
+      await updateAllCheckedStateAPI(userId, checked);
+      await this.getCart(); // 更新本地cartList
+    },
+  },
+  getters: {
+    totalItems: (state) => {
+      return state.cartList.reduce((total, item) => total + item.count, 0);
+    },
+    totalPrice: (state) => {
+      return state.cartList.reduce((total, item) => total + item.count * item.price, 0).toFixed(2);
+    },
+    selectedTotalItem: (state) => {
+      return state.cartList
+        .filter((item) => item.checked)
+        .reduce((total, item) => total + item.count, 0);
+    },
+    selectedTotalPrice: (state) => {
+      return state.cartList
+        .filter((item) => item.checked)
+        .reduce((total, item) => total + item.count * item.price, 0)
+        .toFixed(2);
+    },
+    isAll: (state) => {
+      return state.cartList.length > 0 && state.cartList.every((item) => item.checked);
     }
-  }};
-  const totalItem = computed(() => cartList.value.reduce((sum, item) => sum + item.num, 0));
-  const selectedTotalItem = computed(() => cartList.value.filter(item => item.selected).reduce((sum, item) => sum + item.num, 0));
-  const totalPrice = computed(() => cartList.value.reduce((sum, item) => sum + item.price * item.num, 0).toFixed(2));
-  const selectedTotalPrice = computed(() => cartList.value.filter(item => item.selected).reduce((sum, item) => sum + item.price * item.num, 0).toFixed(2));
-  const delCart = (id) => {
-    cartList.value = cartList.value.filter(item => item.id !== id);
-  };
-
-  const checkedState = (item, selected) => {
-    const target = cartList.value.find(i => i.id === item.id);
-    if (target) {
-      target.selected = selected;
-    }
-  };
-
-  const isAll = computed(() => cartList.value.every(item => item.selected));
-
-  const tickAll = (selected) => {
-    cartList.value.forEach(item => {
-      item.selected = selected;
-    });
-  };
-  return { cartList, addCart, delCart, totalItem, totalPrice, checkedState, isAll, tickAll, selectedTotalItem, selectedTotalPrice};
-
-}, {
-  persist: true,
-
+  }
 });

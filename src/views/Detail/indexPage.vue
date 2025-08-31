@@ -1,52 +1,62 @@
 <script setup>
-import { getDetail } from '@/api/detail.js';
-import { onMounted, ref } from 'vue';
-import { useRoute } from 'vue-router';
-import GoodHot from './Components/goodHot.vue';
-import { useCartStore } from '@/stores/cart.js';
-import { ElMessage } from 'element-plus';
-
-const cart = useCartStore();
+import { getDetail } from "@/api/detail.js";
+import { onMounted, ref } from "vue";
+import { useRoute } from "vue-router";
+import GoodHot from "./Components/goodHot.vue";
+import { useCartStore } from "@/stores/cart.js";
+import { ElMessage } from "element-plus";
+import { useUserStore } from "@/stores/user.js";
+const cartStore = useCartStore();
+const userStore = useUserStore();
 const goods = ref({});
+const cartItem = ref({});
 const route = useRoute();
 const goodId = route.params.id;
+
+
 const getGoods = async () => {
   const res = await getDetail(goodId);
-  goods.value = res.result;
-  console.log('商品详情数据:', goods.value.mainPictures); // 调试输出
-}
+  goods.value = res.result;// 调试输出
+  console.log(goods.value) 
+};
 
 onMounted(() => {
-  getGoods(); 
+  getGoods();
+   
 });
 const num = ref(1);
-let skuobj = {}
+const skuObj = ref({});
 const getSku = (skuInfo) => {
-  console.log('选中的sku信息:', skuInfo)
-  skuobj = skuInfo;
-}
+  skuObj.value = skuInfo
+  console.log(skuObj.value);
+};
 
-const addCart = () => {
-  if(skuobj.skuId){
-    cart.addCart({
-    id: goods.value.id,
-    name: goods.value.name,
-    picture: goods.value.mainPictures[0],
-    price: goods.value.price,
-    num: num.value,
-    skuid: skuobj.skuId,
-    attrsText: skuobj.attrsText,
-    selected: true
-  })
-  } else {
-    ElMessage({
-      message: '请先选择商品规格'
-    })
+
+const addCart = async () => {
+  console.log(!userStore.userInfo.id);
+  if (!userStore.userInfo.id) {
+    ElMessage.error("请先登录");
+    return;
+  } else if(!skuObj.value.skuId){
+    ElMessage.error("请选择商品规格");
+    return;
   }
-}
-
+    console.log(userStore.userInfo.id);
+    cartItem.value = {
+    userId: userStore.userInfo.id,
+    skuId: skuObj.value.skuId,
+    name: goods.value.name,
+    price: goods.value.price,
+    count: num.value,
+    image: goods.value.mainPictures[0],
+    attrsText: skuObj.value.specsText
+    // 其它字段
+  };
+  await cartStore.addToCart(cartItem.value);
+  ElMessage.success("加入购物车成功");
+};
 const handleChange = (value) => {
-  console.log('数量变化:', value);
+  console.log("数量变化:", value);
 };
 </script>
 
@@ -56,9 +66,11 @@ const handleChange = (value) => {
       <div class="bread-container">
         <el-breadcrumb separator=">">
           <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-          <el-breadcrumb-item :to="{ path: `/category/${goods.categories[1].id}` }">{{ goods.categories[1].name }}
+          <el-breadcrumb-item :to="{ path: `/category/${goods.categories[1].id}` }"
+            >{{ goods.categories[1].name }}
           </el-breadcrumb-item>
-          <el-breadcrumb-item :to="{ path: `/category/${goods.categories[0].id}` }">{{goods.categories[0].name }}
+          <el-breadcrumb-item :to="{ path: `/category/${goods.categories[0].id}` }"
+            >{{ goods.categories[0].name }}
           </el-breadcrumb-item>
           <el-breadcrumb-item>{{ goods.name }}</el-breadcrumb-item>
         </el-breadcrumb>
@@ -89,14 +101,14 @@ const handleChange = (value) => {
                 </li>
                 <li>
                   <p>品牌信息</p>
-                  <p>{{ goods.brand.name }}</p>
+                  <p>{{ goods.brand?.name || '未知品牌' }}</p>
                   <p><i class="iconfont icon-dynamic-filling"></i>品牌主页</p>
                 </li>
               </ul>
             </div>
             <div class="spec">
               <!-- 商品信息区 -->
-              <p class="g-name"> {{ goods.name }} </p>
+              <p class="g-name">{{ goods.name }}</p>
               <p class="g-desc">{{ goods.desc }}</p>
               <p class="g-price">
                 <span>{{ goods.price }}</span>
@@ -118,7 +130,7 @@ const handleChange = (value) => {
                 </dl>
               </div>
               <!-- sku组件 -->
-              <XtxSku :goods="goods" @change="getSku"/>
+              <XtxSku :goods="goods" @change="getSku" />
               <!-- 数据组件 -->
               <el-input-number v-model="num" :min="1" :max="10" @change="handleChange" />
 
@@ -128,7 +140,6 @@ const handleChange = (value) => {
                   加入购物车
                 </el-button>
               </div>
-
             </div>
           </div>
           <div class="goods-footer">
@@ -147,14 +158,14 @@ const handleChange = (value) => {
                     </li>
                   </ul>
                   <!-- 图片 -->
-                  <img v-for="pic in goods.details.pictures" :src="pic" :key="pic" alt="">
+                  <img v-for="pic in goods.details.pictures" :src="pic" :key="pic" alt="" />
                 </div>
               </div>
             </div>
             <!-- 24热榜+专题推荐 -->
             <div class="goods-aside">
-              <GoodHot :type="1"/>
-              <GoodHot :type="2"/>
+              <GoodHot :type="1" />
+              <GoodHot :type="2" />
             </div>
           </div>
         </div>
@@ -163,8 +174,7 @@ const handleChange = (value) => {
   </div>
 </template>
 
-
-<style scoped lang='scss'>
+<style scoped lang="scss">
 .xtx-goods-page {
   .goods-info {
     min-height: 600px;
@@ -301,7 +311,7 @@ const handleChange = (value) => {
       flex: 1;
       position: relative;
 
-      ~li::after {
+      ~ li::after {
         position: absolute;
         top: 10px;
         left: 0;
@@ -355,7 +365,7 @@ const handleChange = (value) => {
       font-size: 18px;
       position: relative;
 
-      >span {
+      > span {
         color: $priceColor;
         font-size: 16px;
         margin-left: 10px;
@@ -389,14 +399,13 @@ const handleChange = (value) => {
     }
   }
 
-  >img {
+  > img {
     width: 100%;
   }
 }
 
 .btn {
   margin-top: 20px;
-
 }
 
 .bread-container {

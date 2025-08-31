@@ -1,6 +1,5 @@
 <script setup>
 import { ref } from "vue";
-import bcrypt from 'bcryptjs';
 import { useUserStore } from "@/stores/user";
 import { ElMessage } from "element-plus";
 import router from "@/router";
