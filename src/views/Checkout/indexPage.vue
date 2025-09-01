@@ -1,8 +1,108 @@
 <script setup>
-const checkInfo = {}  // 订单对象
-const curAddress = {}  // 地址对象
+import { useCartStore } from '@/stores/cart';
+import { ref } from 'vue';
+import { useAddressStore } from '@/stores/address';
+import { useRoute } from 'vue-router';
+import { computed } from 'vue';
+import { useOrderStore } from '@/stores/order';
+import router from '@/router';
+
+const route = useRoute();
+const userId = route.params.userId;
+  // 订单对象 // 地址对象
+const orderStore = useOrderStore();
+const cartStore = useCartStore();
+const addressStore = useAddressStore();
+const showDialog = ref(false);
+const addFlag = ref(false);
+const formRef = ref(null);
+const newAddress = ref({
+  userId: userId,
+  receiver: '',
+  number: '',
+  address: ''
+});
+
+const rules = {
+  receiver: [{ required: true, message: '请输入收货人', trigger: 'blur' }],
+  contact: [{ required: true, message: '请输入联系方式', trigger: 'blur' }],
+  address: [{ required: true, message: '请输入详细地址', trigger: 'blur' }]
+};
+
+const addAddress = () => {
+  formRef.value.validate(async (valid) => {
+    if (valid) {
+      await addressStore.addAddress(newAddress.value);
+    }
+    addFlag.value = false;
+    newAddress.value = { userId: userId, receiver: '', number: '', address: '' };
+  });
+  
+  
+};
+
+const getAddressList = async (userId) => {
+  await addressStore.fetchAddressList(userId);
+  showDialog.value = true;
+};
+
+const selectedAddress = computed(() => {
+  return addressStore.addressList.find(i => i.selected) || null;
+})
+
+const switchAddress = async (item) => {
+  await addressStore.isDefaultAddress(userId,item.addressId);
+  await addressStore.fetchAddressList(userId); // 新增：同步最新状态
+};
+
+const orderInfo = ref({
+  user_id:'',
+  receiver: '',
+  number: '',
+  address: '',
+  delivery_type: '',
+  pay_type: '',
+  post_fee: 0,
+  total_amount: 0,
+});
+
+const deliveryType = ref('不限送货时间：周一至周日'); // 默认值
+const setDeliveryType = (type) => { 
+  deliveryType.value = type;
+};
+
+const postFee = computed(()=>{
+  if(paymentType.value === '货到付款'){
+    return 5;
+  }
+  return 0;
+})
+const paymentType = ref('在线支付'); // 默认值
+const setPaymentType = (type) => {
+  paymentType.value = type;
+  if(paymentType.value === '货到付款'){
+    // 货到付款需加5元手续费
+}};
+
+const submitOrder = async () => {
+  orderInfo.value.user_id = userId;
+  orderInfo.value.receiver = selectedAddress.value.receiver;
+  orderInfo.value.number = selectedAddress.value.number;
+  orderInfo.value.address = selectedAddress.value.address;
+  orderInfo.value.post_fee = postFee.value;
+  orderInfo.value.delivery_type = deliveryType.value;
+  orderInfo.value.pay_type = paymentType.value;
+  orderInfo.value.total_amount = cartStore.selectedTotalPrice + orderInfo.value.post_fee;
+  await orderStore.createOrder(orderInfo.value);
+  if (orderStore.orderInfo && orderStore.orderInfo.order_id) {
+    router.push(`/payment/${orderStore.orderInfo.order_id}`);
+  }
+};
 
 </script>
+
+
+
 
 <template>
   <div class="xtx-pay-checkout-page">
@@ -13,15 +113,15 @@ const curAddress = {}  // 地址对象
         <div class="box-body">
           <div class="address">
             <div class="text">
-              <div class="none" v-if="!curAddress">您需要先添加收货地址才可提交订单。</div>
+              <div class="none" v-if="!selectedAddress">您需要先添加收货地址才可提交订单。</div>
               <ul v-else>
-                <li><span>收<i />货<i />人：</span>{{ curAddress.receiver }}</li>
-                <li><span>联系方式：</span>{{ curAddress.contact }}</li>
-                <li><span>收货地址：</span>{{ curAddress.fullLocation }} {{ curAddress.address }}</li>
+                <li><span>收<i />货<i />人：</span>{{ selectedAddress.receiver }}</li>
+                <li><span>联系方式：</span>{{ selectedAddress.number }}</li>
+                <li><span>收货地址：</span>{{ selectedAddress.address }}</li>
               </ul>
             </div>
             <div class="action">
-              <el-button size="large" @click="toggleFlag = true">切换地址</el-button>
+              <el-button size="large" @click="getAddressList(userId)">切换地址</el-button>
               <el-button size="large" @click="addFlag = true">添加地址</el-button>
             </div>
           </div>
@@ -40,10 +140,10 @@ const curAddress = {}  // 地址对象
               </tr>
             </thead>
             <tbody>
-              <tr v-for="i in checkInfo.goods" :key="i.id">
+              <tr v-for="i in cartStore.selectedItems" :key="i.id">
                 <td>
                   <a href="javascript:;" class="info">
-                    <img :src="i.picture" alt="">
+                    <img :src="i.image" alt="">
                     <div class="right">
                       <p>{{ i.name }}</p>
                       <p>{{ i.attrsText }}</p>
@@ -51,9 +151,9 @@ const curAddress = {}  // 地址对象
                   </a>
                 </td>
                 <td>&yen;{{ i.price }}</td>
-                <td>{{ i.price }}</td>
-                <td>&yen;{{ i.totalPrice }}</td>
-                <td>&yen;{{ i.totalPayPrice }}</td>
+                <td>{{ i.count }}</td>
+                <td>&yen;{{ i.price * i.count }}</td>
+                <td>&yen;{{ i.price * i.count }}</td>
               </tr>
             </tbody>
           </table>
@@ -61,15 +161,15 @@ const curAddress = {}  // 地址对象
         <!-- 配送时间 -->
         <h3 class="box-title">配送时间</h3>
         <div class="box-body">
-          <a class="my-btn active" href="javascript:;">不限送货时间：周一至周日</a>
-          <a class="my-btn" href="javascript:;">工作日送货：周一至周五</a>
-          <a class="my-btn" href="javascript:;">双休日、假日送货：周六至周日</a>
+          <a class="my-btn" :class="{active: deliveryType === '不限送货时间：周一至周日'}" href="javascript:;" @click="setDeliveryType('不限送货时间：周一至周日')">不限送货时间：周一至周日</a>
+          <a class="my-btn" :class="{active: deliveryType === '工作日送货：周一至周五'}" href="javascript:;" @click="setDeliveryType('工作日送货：周一至周五')">工作日送货：周一至周五</a>
+          <a class="my-btn" :class="{active: deliveryType === '双休日、假日送货：周六至周日'}" href="javascript:;" @click="setDeliveryType('双休日、假日送货：周六至周日')">双休日、假日送货：周六至周日</a>
         </div>
         <!-- 支付方式 -->
         <h3 class="box-title">支付方式</h3>
         <div class="box-body">
-          <a class="my-btn active" href="javascript:;">在线支付</a>
-          <a class="my-btn" href="javascript:;">货到付款</a>
+          <a class="my-btn" :class="{active: paymentType === '在线支付'}" href="javascript:;" @click="setPaymentType('在线支付')">在线支付</a>
+          <a class="my-btn" :class="{active: paymentType === '货到付款'}" href="javascript:;" @click="setPaymentType('货到付款')">货到付款</a>
           <span style="color:#999">货到付款需付5元手续费</span>
         </div>
         <!-- 金额明细 -->
@@ -78,31 +178,68 @@ const curAddress = {}  // 地址对象
           <div class="total">
             <dl>
               <dt>商品件数：</dt>
-              <dd>{{ checkInfo.summary?.goodsCount }}件</dd>
+              <dd>{{ cartStore.selectedTotalItem }}件</dd>
             </dl>
             <dl>
               <dt>商品总价：</dt>
-              <dd>¥{{ checkInfo.summary?.totalPrice.toFixed(2) }}</dd>
+              <dd>¥{{ cartStore.selectedTotalPrice }}</dd>
             </dl>
             <dl>
               <dt>运<i></i>费：</dt>
-              <dd>¥{{ checkInfo.summary?.postFee.toFixed(2) }}</dd>
+              <dd>¥{{ postFee}}</dd>
             </dl>
             <dl>
               <dt>应付总额：</dt>
-              <dd class="price">{{ checkInfo.summary?.totalPayPrice.toFixed(2) }}</dd>
+              <dd class="price">{{ (parseInt(cartStore.selectedTotalPrice) + parseInt(postFee)).toFixed(2) }}</dd>
             </dl>
           </div>
         </div>
         <!-- 提交订单 -->
         <div class="submit">
-          <el-button type="primary" size="large" >提交订单</el-button>
+          <el-button type="primary" size="large" @click="submitOrder">提交订单</el-button>
         </div>
       </div>
     </div>
   </div>
   <!-- 切换地址 -->
+   <el-dialog v-model="addFlag" title="添加收货地址" width="30%" center>
+  <el-form :model="newAddress" :rules="rules" label-width="80px" ref="formRef">
+    <el-form-item label="收货人">
+      <el-input v-model="newAddress.receiver" prop="receiver" placeholder="请输入收货人"></el-input>
+    </el-form-item>
+    <el-form-item label="联系方式">
+      <el-input v-model="newAddress.number" prop="number" placeholder="请输入手机号"></el-input>
+    </el-form-item>
+    <el-form-item label="详细地址">
+      <el-input v-model="newAddress.address" prop="address" placeholder="请输入详细地址"></el-input>
+    </el-form-item>
+  </el-form>
+  <template #footer>
+    <span class="dialog-footer">
+      <el-button @click="addFlag = false">取消</el-button>
+      <el-button type="primary" @click="addAddress">确定</el-button>
+    </span>
+  </template>
+</el-dialog>
+
   <!-- 添加地址 -->
+  <el-dialog v-model="showDialog" title="切换收货地址" width="30%" center>
+    <div class="addressWrapper">
+      <div class="text item" :class="{ active: item.selected === true }" @click="switchAddress(item,item.addressId)" v-for="item in addressStore.addressList" :key="item.addressId">
+        <ul>
+          <li><span>收<i />货<i />人：</span>{{ item.receiver }}</li>
+          <li><span>联系方式：</span>{{ item.number }}</li>
+          <li><span>收货地址：</span>{{ item.address }}</li>
+        </ul>
+      </div>
+    </div>
+    <template #footer>
+      <span class="dialog-footer">  
+        <el-button>取消</el-button>
+        <el-button type="primary" @click="showDialog = false">确定</el-button>
+      </span>
+    </template>
+  </el-dialog>
 </template>
 
 <style scoped lang="scss">

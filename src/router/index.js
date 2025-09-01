@@ -7,6 +7,7 @@ import SubCategoryPage from "../views/SubCategory/indexPage.vue";
 import DetailPage from "../views/Detail/indexPage.vue";
 import cartListPage from "../views/CartList/indexPage.vue";
 import CheckoutPage from "../views/Checkout/indexPage.vue";
+import PaymentPage from "../views/pay/indexPage.vue";
 const router = createRouter({
   history: createWebHistory(),
   routes: [
@@ -35,8 +36,12 @@ const router = createRouter({
           component: cartListPage,
         },
         {
-          path: "/checkout",
+          path: "/checkout/:userId",
           component: CheckoutPage,
+        },
+        {
+          path: "/payment/:orderId",
+          component: PaymentPage,
         }
       ],
     },

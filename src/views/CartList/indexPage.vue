@@ -1,18 +1,16 @@
 <script setup>
 import { useCartStore } from '@/stores/cart';
-import { useUserStore } from '@/stores/user';
 import router from '@/router';
 import { useRoute } from 'vue-router';
 const route = useRoute();
 const userId = route.params.userId;
 const cartStore = useCartStore();
-const userStore = useUserStore();
 console.log(cartStore.cartList);
 const updateChecked = (item, selected) => {
   cartStore.updateCheckedState(item, selected);
 };
 const checkAll = (selected) => {
-  cartStore.updateAllCheckedStateAPI(userStore.userInfo.id, selected);
+  cartStore.updateAllCheckedStateAPI(userId, selected);
 }
 </script>
 
@@ -88,7 +86,7 @@ const checkAll = (selected) => {
           <span class="red">¥ {{ cartStore.selectedTotalPrice }} </span>
         </div>
         <div class="total">
-          <el-button size="large" type="primary" @click="router.push('/checkout')">下单结算</el-button>
+          <el-button size="large" type="primary" @click="router.push(`/checkout/${userId}`)">下单结算</el-button>
         </div>
       </div>
     </div>

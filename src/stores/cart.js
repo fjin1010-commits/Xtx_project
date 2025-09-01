@@ -41,6 +41,9 @@ export const useCartStore = defineStore("cart", {
     },
   },
   getters: {
+    selectedItems: (state) => {
+      return state.cartList.filter((item) => item.checked);
+    },
     totalItems: (state) => {
       return state.cartList.reduce((total, item) => total + item.count, 0);
     },
