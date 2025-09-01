@@ -15,7 +15,6 @@ const loginChecked = () => {
 };
 
 export const getCartAPI = async (userId) => {
-  loginChecked();
   const { data, error } = await supabase.from("cart").select("*").eq("userId", userId).order("added_at", { ascending: true });
   return { data, error };
 };

@@ -1,10 +1,12 @@
 <script setup>
 import router from '@/router';
 import { useUserStore } from '@/stores/user';
-
+import { useCartStore } from '@/stores/cart';
 const userStore = useUserStore();
+const cartStore = useCartStore();
 const confirm = () => {
   userStore.logOut();
+  cartStore.clearCart();
   router.replace('/login');
 }
 </script>

@@ -14,6 +14,9 @@ export const useCartStore = defineStore("cart", {
   }),
 
   actions: {
+    clearCart(){
+      this.cartList = [];
+    },
     async getCart() {
       const userStore = useUserStore();
       const { data, error } = await getCartAPI(userStore.userInfo.id);
