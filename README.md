@@ -1,35 +1,42 @@
-# vue-project
+# XTX E-commerce (Vue 3 + Vite)
 
-This template should help get you started developing with Vue 3 in Vite.
+A full-stack oriented e-commerce web app built with **Vue 3**, **Pinia**, and modern front-end tooling.  
+Deployed on **Vercel** for fast, zero-config hosting.
 
-## Recommended IDE Setup
+- **Live Demo**: https://xtx-project-75kd-7gn6wp0wq-3315744065qqcoms-projects.vercel.app
+- **Repository**: https://github.com/fjin1010-commits/Xtx_project
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+> Screenshots  
+> ![Home](docs/screenshots/home.png)  
+> ![Cart](docs/screenshots/cart.png)
 
-## Customize configuration
+---
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+## ✨ Features
 
-## Project Setup
+- [x] Product listing & detail pages
+- [x] Global state with **Pinia** (cart, user/session, UI states)
+- [x] Responsive layout (Flex/Grid), **Element Plus** UI components
+- [x] Reusable API utilities (fetch wrappers, error handling)
+- [x] Client-side routing (vue-router), protected routes (e.g., checkout)
+- [ ] Checkout & payment gateway placeholder (Stripe/PayPal planned)
+- [ ] Admin dashboard (product CRUD, order management) – *planned*
 
-```sh
-npm install
-```
+> Tip: keep a clear “in-progress” label for HR/reviewers so they know what’s shipped and what’s planned.
 
-### Compile and Hot-Reload for Development
+---
 
-```sh
-npm run dev
-```
+## 🛠 Tech Stack
 
-### Compile and Minify for Production
+- **Front-end**: Vue 3, Pinia, Vue Router, Element Plus, Vite
+- **Styling**: CSS3 / SCSS, Flexbox & Grid, responsive design
+- **Tooling**: ESLint, npm scripts
+- **Deployment**: Vercel (CI/CD)
 
-```sh
-npm run build
-```
+> Languages breakdown shown by GitHub:
+> Vue ~80%, JavaScript ~17.7%, SCSS ~1.9%, HTML ~0.4%. :contentReference[oaicite:1]{index=1}
 
-### Lint with [ESLint](https://eslint.org/)
+---
 
-```sh
-npm run lint
-```
+## 📂 Project Structure (sample)
+
