@@ -7,8 +7,8 @@ Deployed on **Vercel** for fast, zero-config hosting.
 - **Repository**: https://github.com/fjin1010-commits/Xtx_project
 
 > Screenshots  
-> ![Home](docs/screenshots/home.png)  
-> ![Cart](docs/screenshots/cart.png)
+> ![Home](docs/screenshots/home.jpg)  
+> ![Cart](docs/screenshots/category.jpg)
 
 ---
 
