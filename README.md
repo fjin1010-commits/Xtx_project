@@ -38,5 +38,23 @@ Deployed on **Vercel** for fast, zero-config hosting.
 
 ---
 
-## 📂 Project Structure (sample)
+```bash
+# 1) Clone
+git clone https://github.com/fjin1010-commits/Xtx_project.git
+cd Xtx_project
+
+# 2) Install
+npm install
+
+# 3) Dev
+npm run dev
+
+# 4) Build
+npm run build
+
+# 5) Preview (after build)
+npm run preview
+
+# 6) Lint
+npm run lint
 
